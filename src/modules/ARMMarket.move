@@ -167,27 +167,27 @@ module ARMMarket {
         let nft_selling = borrow_global_mut<ARMSelling>(NFT_MARKET_ADDRESS);
         let owner_address = Signer::address_of(account);
         // Withdraw one NFT token from your account
-        let option_nft = NFTGallery::withdraw<NFTMeta, NFTBody>(account, id);
-        assert(Option::is_some<NFT<NFTMeta, NFTBody>>(&option_nft), ID_NOT_EXIST);
+        let option_nft = NFTGallery::withdraw(account, id);
+        assert(Option::is_some<NFT>(&option_nft), ID_NOT_EXIST);
         let nft_sell_info = ARMSellInfo {
             seller: owner_address,
             nft: option_nft,
             id: id,
             selling_price: selling_price,
-            bid_tokens: Token::zero<PayToken>(),
+            bid_tokens: Token::zero<AWW>(),
             bidder: @0x1,
         };
         // arm_sell_info add Vector
         Vector::push_back(&mut nft_selling.items, nft_sell_info);
         // accept PayToken
-        if (!Account::is_accepts_token<PayToken>(owner_address)){
-            Account::do_accept_token<PayToken>(account);
+        if (!Account::is_accepts_token<AWW>(owner_address)){
+            Account::do_accept_token<AWW>(account);
         };
         Event::emit_event(&mut nft_selling.sell_events,
             NFTSellEvent {
                 seller: owner_address,
                 id: id,
-                pay_token_code: Token::token_code<PayToken>(),
+                pay_token_code: Token::token_code<AWW>(),
                 selling_price: selling_price,
             },
         );
@@ -207,17 +207,17 @@ module ARMMarket {
         // give back payToken to bidder
         let bid_amount = Token::value(&nft_sell_info.bid_tokens);
         if (bid_amount > 0) {
-            let bid_tokens = Token::withdraw<PayToken>(&mut nft_sell_info.bid_tokens, bid_amount);
-            Account::deposit<PayToken>(user_address, bid_tokens);
+            let bid_tokens = Token::withdraw<AWW>(&mut nft_sell_info.bid_tokens, bid_amount);
+            Account::deposit<AWW>(user_address, bid_tokens);
         };
         // get back NFT
         let nft = Option::extract(&mut nft_sell_info.nft);
-        NFTGallery::deposit_to<NFTMeta, NFTBody>(nft_sell_info.seller, nft);
+        NFTGallery::deposit_to(nft_sell_info.seller, nft);
         Event::emit_event(&mut nft_selling.offline_events,
             NFTOfflineEvent {
                 seller: nft_sell_info.seller,
                 id: nft_sell_info.id,
-                pay_token_code: Token::token_code<PayToken>(),
+                pay_token_code: Token::token_code<AWW>(),
                 selling_price: nft_sell_info.selling_price,
                 bid_price: bid_amount,
                 bidder: nft_sell_info.bidder,
@@ -254,35 +254,35 @@ module ARMMarket {
         let user_address = Signer::address_of(account);
         let nft_selling = borrow_global_mut<ARMSelling>(NFT_MARKET_ADDRESS);
         let selling_price = nft_sell_info.selling_price;
-        let token_balance = Account::balance<PayToken>(user_address);
+        let token_balance = Account::balance<AWW>(user_address);
         assert(token_balance >= selling_price, INSUFFICIENT_BALANCE);
         let nft = Option::extract(&mut nft_sell_info.nft);
 
         let (creator_fee, platform_fee) = get_fee(selling_price);
 
-        let creator_address = NFT::get_creator<NFTMeta, NFTBody>(&nft);
-        let creator_fee_token = Account::withdraw<PayToken>(account, creator_fee);
-        Account::deposit<PayToken>(creator_address, creator_fee_token);
+        let creator_address = NFT::get_creator(&nft);
+        let creator_fee_token = Account::withdraw<AWW>(account, creator_fee);
+        Account::deposit<AWW>(creator_address, creator_fee_token);
 
         let platform_fee_token = Account::withdraw<PayToken>(account, platform_fee);
-        Account::deposit<PayToken>(NFT_MARKET_ADDRESS, platform_fee_token);
+        Account::deposit<AWW>(NFT_MARKET_ADDRESS, platform_fee_token);
 
         let surplus_amount = selling_price - creator_fee - platform_fee;
-        let surplus_amount_token = Account::withdraw<PayToken>(account, surplus_amount);
-        Account::deposit<PayToken>(nft_sell_info.seller, surplus_amount_token);
+        let surplus_amount_token = Account::withdraw<AWW>(account, surplus_amount);
+        Account::deposit<AWW>(nft_sell_info.seller, surplus_amount_token);
 
         //        let balance_stc = Account::balance<PayToken>(nft_sell_info.seller);
         //        Debug::print<u128>(&balance_stc);
 
         // accept
-        NFTGallery::accept<NFTMeta, NFTBody>(account);
+        NFTGallery::accept(account);
         // arm transer Own
-        NFTGallery::deposit<NFTMeta, NFTBody>(account, nft);
+        NFTGallery::deposit(account, nft);
         // give back bid token to bidder
-        let bid_price = Token::value<PayToken>(&nft_sell_info.bid_tokens);
+        let bid_price = Token::value<AWW>(&nft_sell_info.bid_tokens);
         if (bid_price > 0u128) {
-            let withdraw_bid_token = Token::withdraw<PayToken>(&mut nft_sell_info.bid_tokens, bid_price);
-            Account::deposit<PayToken>(nft_sell_info.bidder, withdraw_bid_token);
+            let withdraw_bid_token = Token::withdraw<AWW>(&mut nft_sell_info.bid_tokens, bid_price);
+            Account::deposit<AWW>(nft_sell_info.bidder, withdraw_bid_token);
         };
 
         //send NFTSellEvent event
