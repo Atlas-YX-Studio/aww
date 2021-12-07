@@ -108,9 +108,9 @@ module ARMMarket {
     struct ARMSelling has key, store {
         // arm selling list
         items: vector<ARMSellInfo>,
-        sell_events: Event::EventHandle<ARMSellEvent>,
-        offline_events: Event::EventHandle<ARMOfflineEvent>,
-        buy_events: Event::EventHandle<ARMBuyEvent>,
+        sell_events: Event::EventHandle<ARMPlaceOrderEvent>,
+        offline_events: Event::EventHandle<ARMCancelOrderEvent>,
+        buy_events: Event::EventHandle<ARMTakeOrderEvent>,
     }
 
     // ARM extra sell info
@@ -126,16 +126,16 @@ module ARMMarket {
         bidder: address,
     }
 
-    // ARM sell event
-    struct ARMSellEvent has drop, store {
+    // ARM place order event
+    struct ARMPlaceOrderEvent has drop, store {
         seller: address,
         id: u64,
         pay_token_code: Token::TokenCode,
         selling_price: u128,
     }
 
-    // ARM offline event
-    struct ARMOfflineEvent has drop, store {
+    // ARM cancel order event
+    struct ARMCancelOrderEvent has drop, store {
         seller: address,
         id: u64,
         pay_token_code: Token::TokenCode,
@@ -144,8 +144,8 @@ module ARMMarket {
         bidder: address,
     }
 
-    // ARM buy event
-    struct ARMBuyEvent has drop, store {
+    // ARM match order event
+    struct ARMTakeOrderEvent has drop, store {
         seller: address,
         id: u64,
         pay_token_code: Token::TokenCode,
