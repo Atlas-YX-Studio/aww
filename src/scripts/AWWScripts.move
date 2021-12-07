@@ -54,8 +54,8 @@ module AWWScripts {
 
     // ******************** ARM Transaction ********************
 
-    // ARM sell
-    public(script) fun arm_sell(
+    // ARM place order
+    public(script) fun arm_place_order(
         account: signer,
         id: u64,
         selling_price: u128
@@ -63,8 +63,8 @@ module AWWScripts {
 
     }
 
-    // ARM offline
-    public(script) fun arm_offline(
+    // ARM cancel order
+    public(script) fun arm_cancel_order(
         account: signer,
         id: u64,
     ) {
@@ -72,7 +72,7 @@ module AWWScripts {
     }
 
     // ARM buy
-    public(script) fun arm_buy(
+    public(script) fun arm_take_order(
         account: signer,
         id: u64
     ) {
