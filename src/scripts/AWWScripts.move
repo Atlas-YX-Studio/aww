@@ -1,7 +1,7 @@
 address 0x333 {
 module AWWScripts {
 
-    use 0x222::NFTMarket;
+    use 0x222::ARMMarket;
 
     // ******************** Config ********************
     // init
@@ -10,7 +10,7 @@ module AWWScripts {
         creator_fee: u128,
         platform_fee: u128
     ) {
-        NFTMarket::init_config(&sender, creator_fee, platform_fee);
+        ARMMarket::init_config(&sender, creator_fee, platform_fee);
     }
 
     public(script) fun update_config(
@@ -18,7 +18,7 @@ module AWWScripts {
         creator_fee: u128,
         platform_fee: u128
     ) {
-        NFTMarket::update_config(&sender, creator_fee, platform_fee);
+        ARMMarket::update_config(&sender, creator_fee, platform_fee);
     }
 
     // ******************** Initial Offering ********************
@@ -31,9 +31,7 @@ module AWWScripts {
 
     // ******************** AWW GAME Transaction ********************
 
-    public(script) fun arm_mint(
-        account: signer
-    ) {
+    public(script) fun arm_mint(account: signer) {
 
     }
 
@@ -60,7 +58,7 @@ module AWWScripts {
         id: u64,
         selling_price: u128
     ) {
-
+        ARMMarket::nft_place_order(&account, id,selling_price);
     }
 
     // ARM cancel order
@@ -68,7 +66,7 @@ module AWWScripts {
         account: signer,
         id: u64,
     ) {
-
+        ARMMarket::nft_cancel_order(&account, id);
     }
 
     // ARM buy
@@ -76,7 +74,7 @@ module AWWScripts {
         account: signer,
         id: u64
     ) {
-
+        ARMMarket::nft_take_order(&account, id);
     }
 
 }
