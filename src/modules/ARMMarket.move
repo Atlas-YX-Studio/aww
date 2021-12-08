@@ -140,7 +140,6 @@ module ARMMarket {
         id: u64,
         pay_token_code: Token::TokenCode,
         selling_price: u128,
-        bid_price: u128,
         bidder: address,
     }
 
@@ -149,7 +148,7 @@ module ARMMarket {
         seller: address,
         id: u64,
         pay_token_code: Token::TokenCode,
-        price: u128,
+        selling_price: u128,
         buyer: address,
         platform_fee: u128,
     }
@@ -278,7 +277,7 @@ module ARMMarket {
                 seller: nft_sell_info.seller,
                 id: nft_sell_info.id,
                 pay_token_code: Token::token_code<AWW>(),
-                price: selling_price,
+                selling_price: selling_price,
                 buyer: user_address,
                 platform_fee: platform_fee,
             },
