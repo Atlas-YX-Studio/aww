@@ -1,4 +1,4 @@
-address 0x222 {
+address 0x16a8bf4d0c3718518d81f132801e4aaa {
 module ARMMarket {
 
     use 0x1::Event;
@@ -11,10 +11,10 @@ module ARMMarket {
     use 0x1::NFT::{Self, NFT};
     use 0x1::NFTGallery;
 
-    use 0x333::ARM::{ARMMeta, ARMBody};
-    use 0x444::AWW::AWW;
+    use 0x16a8bf4d0c3718518d81f132801e4aaa::AWW::AWW;
+    use 0x16a8bf4d0c3718518d81f132801e4aaa::ARM::{ARMMeta, ARMBody};
 
-    const NFT_MARKET_ADDRESS: address = @0x222;
+    const NFT_MARKET_ADDRESS: address = @0x16a8bf4d0c3718518d81f132801e4aaa;
 
     //error
     const PERMISSION_DENIED: u64 = 200001;
@@ -68,10 +68,9 @@ module ARMMarket {
     }
 
     // ******************** Initial market ********************
-    // init market resource 
-    public fun init_market<NFTMeta: store + drop, NFTBody: store + drop>(
+    // init market resource
+    public fun init_market (
         sender: &signer,
-        creator: address,
     ) {
         let sender_address = Signer::address_of(sender);
         assert(sender_address == NFT_MARKET_ADDRESS, PERMISSION_DENIED);
@@ -94,7 +93,7 @@ module ARMMarket {
         items: vector<ARMSellInfo>,
         place_order_events: Event::EventHandle<ARMPlaceOrderEvent>,
         cancel_order_events: Event::EventHandle<ARMCancelOrderEvent>,
-        take_order_events: Event::EventHandle<ARMTakeOrderEvent>, 
+        take_order_events: Event::EventHandle<ARMTakeOrderEvent>,
     }
 
     // ARM extra sell info
@@ -106,8 +105,6 @@ module ARMMarket {
         id: u64,
         // selling price
         selling_price: u128,
-        // buyer address
-        bidder: address,
     }
 
     // ARM place order event
@@ -140,7 +137,7 @@ module ARMMarket {
     }
 
     // ARM place order
-    public fun nft_place_order(account: &signer, id: u64, selling_price: u128) acquires ARMSelling {
+    public fun arm_place_order(account: &signer, id: u64, selling_price: u128) acquires ARMSelling {
         // ARMSelling exists
         assert(exists<ARMSelling>(NFT_MARKET_ADDRESS), OFFERING_NOT_EXISTS);
         assert(selling_price > 0, PRICE_TOO_LOW);
@@ -155,7 +152,6 @@ module ARMMarket {
             nft: option_nft,
             id: id,
             selling_price: selling_price,
-            bidder: @0x1,
         };
         // arm_sell_info add Vector
         Vector::push_back(&mut nft_selling.items, nft_sell_info);
@@ -175,20 +171,13 @@ module ARMMarket {
     }
 
     // ARM cancel order
-    public fun nft_cancel_order(account: &signer, id: u64) acquires ARMSelling {
+    public fun arm_cancel_order(account: &signer, id: u64) acquires ARMSelling {
         assert(exists<ARMSelling>(NFT_MARKET_ADDRESS), OFFERING_NOT_EXISTS);
         let nft_selling = borrow_global_mut<ARMSelling>(NFT_MARKET_ADDRESS);
-        let nft_sell_info = find_ntf_sell_info_by_id(&mut nft_selling.items, id);
+        let nft_sell_info = find_arm_sell_info_by_id(&mut nft_selling.items, id);
         // check seller
         let user_address = Signer::address_of(account);
         assert(user_address == nft_sell_info.seller, PERMISSION_DENIED);
-        // give back payToken to bidder
-        // let bid_amount = Token::value(&nft_sell_info.bid_tokens);
-        // if (bid_amount > 0) {
-        //     let bid_tokens = Token::withdraw<AWW>(&mut nft_sell_info.bid_tokens, bid_amount);
-        //     Account::deposit<AWW>(user_address, bid_tokens);
-        // };
-        // get back NFT
         let nft = Option::extract(&mut nft_sell_info.nft);
         NFTGallery::deposit_to<ARMMeta, ARMBody>(nft_sell_info.seller, nft);
         Event::emit_event(&mut nft_selling.cancel_order_events,
@@ -206,20 +195,19 @@ module ARMMarket {
             nft,
             id: _,
             selling_price: _,
-            bidder: _,
         } = nft_sell_info;
         Option::destroy_none(nft);
     }
 
     // ARM take order
-    public fun nft_take_order(account: &signer,id: u64) acquires ARMSelling, Config {
+    public fun arm_take_order(account: &signer,id: u64) acquires ARMSelling, Config {
         let nft_selling = borrow_global_mut<ARMSelling>(NFT_MARKET_ADDRESS);
-        let nft_sell_info = find_ntf_sell_info_by_id(&mut nft_selling.items, id);
-        f_nft_take_order<>(account, nft_sell_info);
+        let nft_sell_info = find_arm_sell_info_by_id(&mut nft_selling.items, id);
+        f_arm_take_order<>(account, nft_sell_info);
     }
 
     // ARM buy private
-    fun f_nft_take_order(
+    fun f_arm_take_order(
         account: &signer,
         nft_sell_info: ARMSellInfo
     ) acquires ARMSelling, Config {
@@ -232,9 +220,11 @@ module ARMMarket {
 
         let (creator_fee, platform_fee) = get_fee(selling_price);
 
-        let creator_address = NFT::get_creator<ARMMeta, ARMBody>(&nft);
-        let creator_fee_token = Account::withdraw<AWW>(account, creator_fee);
-        Account::deposit<AWW>(creator_address, creator_fee_token);
+        if (creator_fee > 0) {
+            let creator_address = NFT::get_creator<ARMMeta, ARMBody>(&nft);
+            let creator_fee_token = Account::withdraw<AWW>(account, creator_fee);
+            Account::deposit<AWW>(creator_address, creator_fee_token);
+        };
 
         let platform_fee_token = Account::withdraw<AWW>(account, platform_fee);
         Account::deposit<AWW>(NFT_MARKET_ADDRESS, platform_fee_token);
@@ -243,19 +233,10 @@ module ARMMarket {
         let surplus_amount_token = Account::withdraw<AWW>(account, surplus_amount);
         Account::deposit<AWW>(nft_sell_info.seller, surplus_amount_token);
 
-        //        let balance_stc = Account::balance<PayToken>(nft_sell_info.seller);
-        //        Debug::print<u128>(&balance_stc);
-
         // accept
         NFTGallery::accept<ARMMeta, ARMBody>(account);
         // arm transer Own
         NFTGallery::deposit<ARMMeta, ARMBody>(account, nft);
-        // give back bid token to bidder
-        // let bid_price = Token::value<AWW>(&nft_sell_info.bid_tokens);
-        // if (bid_price > 0u128) {
-        //     let withdraw_bid_token = Token::withdraw<AWW>(&mut nft_sell_info.bid_tokens, bid_price);
-        //     Account::deposit<AWW>(nft_sell_info.bidder, withdraw_bid_token);
-        // };
 
         //send NFTSellEvent event
         Event::emit_event(&mut nft_selling.take_order_events,
@@ -271,7 +252,6 @@ module ARMMarket {
         );
         let ARMSellInfo {
             seller: _,
-            bidder: _,
             nft,
             id: _,
             selling_price: _,
@@ -280,7 +260,7 @@ module ARMMarket {
     }
 
     //get nft_sell_info by id
-    fun find_ntf_sell_info_by_id(c: &mut vector<ARMSellInfo>, id: u64): ARMSellInfo {
+    fun find_arm_sell_info_by_id(c: &mut vector<ARMSellInfo>, id: u64): ARMSellInfo {
         let len = Vector::length(c);
         assert(len > 0, ID_NOT_EXIST);
         let i = len - 1;

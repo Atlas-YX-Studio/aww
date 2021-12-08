@@ -1,7 +1,7 @@
-address 0x333 {
+address 0x16a8bf4d0c3718518d81f132801e4aaa {
 module AWWScripts {
 
-    use 0x222::ARMMarket;
+    use 0x16a8bf4d0c3718518d81f132801e4aaa::ARMMarket;
 
     // ******************** Config ********************
     // init
@@ -24,30 +24,29 @@ module AWWScripts {
     // ******************** Initial Offering ********************
     public(script) fun init_market<NFTMeta: store + drop, NFTBody: store + drop, BoxToken: store, PayToken: store>(
         sender: signer,
-        creator: address,
     ) {
-
+        ARMMarket::init_market(&sender);
     }
 
     // ******************** AWW GAME Transaction ********************
 
-    public(script) fun arm_mint(account: signer) {
-
-    }
-
-    public(script) fun fight(
-        account: signer,
-        id: u64,
-        level: u8
-    ) {
-
-    }
-
-    public(script) fun harvest_reward(
-        account: signer
-    ) {
-
-    }
+//    public(script) fun arm_mint(account: signer) {
+//
+//    }
+//
+//    public(script) fun fight(
+//        account: signer,
+//        id: u64,
+//        level: u8
+//    ) {
+//
+//    }
+//
+//    public(script) fun harvest_reward(
+//        account: signer
+//    ) {
+//
+//    }
 
 
     // ******************** ARM Transaction ********************
@@ -58,7 +57,7 @@ module AWWScripts {
         id: u64,
         selling_price: u128
     ) {
-        ARMMarket::nft_place_order(&account, id,selling_price);
+        ARMMarket::arm_place_order(&account, id,selling_price);
     }
 
     // ARM cancel order
@@ -66,7 +65,7 @@ module AWWScripts {
         account: signer,
         id: u64,
     ) {
-        ARMMarket::nft_cancel_order(&account, id);
+        ARMMarket::arm_cancel_order(&account, id);
     }
 
     // ARM buy
@@ -74,7 +73,7 @@ module AWWScripts {
         account: signer,
         id: u64
     ) {
-        ARMMarket::nft_take_order(&account, id);
+        ARMMarket::arm_take_order(&account, id);
     }
 
 }

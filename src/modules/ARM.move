@@ -1,4 +1,4 @@
-address 0x333 {
+address 0x16a8bf4d0c3718518d81f132801e4aaa {
 module ARM {
     use 0x1::Signer;
     use 0x1::Event;
@@ -9,15 +9,15 @@ module ARM {
     use 0x1::Timestamp;
     use 0x1::NFT::{Self, NFT};
     use 0x1::NFTGallery;
-    use 0x1::STC::STC;
-    use 0x111::AWW::AWW;
-    use 0x111::AWW::USDT;
-    use 0x555::SwapLibrary;
-    use 0x555::SwapPair;
+    use 0x16a8bf4d0c3718518d81f132801e4aaa::AWW::AWW;
+    use 0x5b876a58b0e1cff855b6489cd8cf3bec::DummyToken::STC;
+    use 0x5b876a58b0e1cff855b6489cd8cf3bec::DummyToken::USDT;
+    use 0xc9097c917625f3b01d59b375e0630b07::SwapLibrary;
+    use 0xc9097c917625f3b01d59b375e0630b07::SwapPair;
 
-    const ARM_ADDRESS: address = @0x111;
+    const ARM_ADDRESS: address = @0x16a8bf4d0c3718518d81f132801e4aaa;
 
-    const SWAP_ADDRESS: address = @0x111;
+    const SWAP_ADDRESS: address = @0xc9097c917625f3b01d59b375e0630b07;
 
     const PERMISSION_DENIED: u64 = 100001;
 
