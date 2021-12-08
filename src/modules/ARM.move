@@ -4,14 +4,28 @@ module ARM {
     use 0x1::Event;
     use 0x1::Block;
     use 0x1::Vector;
-    use 0x1::Token;
     use 0x1::Account;
+    use 0x1::Math;
+    use 0x1::Timestamp;
     use 0x1::NFT::{Self, NFT};
     use 0x1::NFTGallery;
+    use 0x1::STC::STC;
+    use 0x111::AWW::AWW;
+    use 0x111::AWW::USDT;
+    use 0x555::SwapLibrary;
+    use 0x555::SwapPair;
 
     const ARM_ADDRESS: address = @0x111;
 
+    const SWAP_ADDRESS: address = @0x111;
+
     const PERMISSION_DENIED: u64 = 100001;
+
+    const INSUFFICIENT_STAMINA: u64 = 100002;
+
+    const SWAP_PAIR_NOT_EXISTS: u64 = 100003;
+
+    const DAY_FACTOR: u64 = 86400;
 
     // ******************** ARM ********************
     // ARM extra meta
@@ -22,13 +36,17 @@ module ARM {
     }
 
     // ARM body
-    struct ARMBody has copy, store, drop {}
+    struct ARMBody has copy, store, drop {
+        time: u64,
+        used_stamina: u8,
+    }
 
     // ARM extra type info
     struct ARMTypeInfo has copy, store, drop {}
 
-    struct ARMNFTCapability has key {
+    struct ARMCapability has key {
         mint: NFT::MintCapability<ARMMeta>,
+        update: NFT::UpdateCapability<ARMMeta>,
     }
 
     // init nft with image data
@@ -38,7 +56,8 @@ module ARM {
     ) {
         NFT::register<ARMMeta, ARMTypeInfo>(sender, ARMTypeInfo {}, metadata);
         let mint = NFT::remove_mint_capability<ARMMeta>(sender);
-        move_to(sender, ARMNFTCapability { mint });
+        let update = NFT::remove_update_capability<ARMMeta>(sender);
+        move_to(sender, ARMCapability { mint, update });
     }
 
     // mint nft
@@ -48,9 +67,9 @@ module ARM {
         rarity: u8,
         stamina: u8,
         win_rate_bonus: u8,
-    ) acquires ARMNFTCapability, ARMGallery {
+    ) acquires ARMCapability, ARMGallery {
         let sender_address = Signer::address_of(sender);
-        let cap = borrow_global_mut<ARMNFTCapability>(sender_address);
+        let cap = borrow_global_mut<ARMCapability>(sender_address);
         let nft = NFT::mint_with_cap<ARMMeta, ARMBody, ARMTypeInfo>(
             sender_address,
             &mut cap.mint,
@@ -60,7 +79,10 @@ module ARM {
                 stamina,
                 win_rate_bonus
             },
-            ARMBody {}
+            ARMBody {
+                time: 0u64,
+                used_stamina: 0u8,
+            }
         );
         let gallery = borrow_global_mut<ARMGallery>(sender_address);
         let id = NFT::get_id<ARMMeta, ARMBody>(&nft);
@@ -78,11 +100,18 @@ module ARM {
     struct ARMGallery has key, store {
         items: vector<NFT<ARMMeta, ARMBody>>,
         arm_mint_events: Event::EventHandle<ARMMintEvent>,
+        arm_get_events: Event::EventHandle<ArmGetEvent>,
     }
 
     // arm mint event
     struct ARMMintEvent has drop, store {
         creator: address,
+        id: u64,
+    }
+
+    // arm get event
+    struct ArmGetEvent has drop, store {
+        owner: address,
         id: u64,
     }
 
@@ -92,6 +121,7 @@ module ARM {
             let gallery = ARMGallery {
                 items: Vector::empty<NFT<ARMMeta, ARMBody>>(),
                 arm_mint_events: Event::new_event_handle<ARMMintEvent>(sender),
+                arm_get_events: Event::new_event_handle<ArmGetEvent>(sender),
             };
             move_to(sender, gallery);
         }
@@ -113,7 +143,7 @@ module ARM {
         image: vector<u8>,
         description: vector<u8>,
     ) {
-        assert(Signer::address_of(sender) == NFT_ADDRESS, PERMISSION_DENIED);
+        assert(Signer::address_of(sender) == ARM_ADDRESS, PERMISSION_DENIED);
         let metadata = NFT::new_meta_with_image(name, image, description);
         init_arm(sender, metadata);
         init_gallery(sender);
@@ -127,7 +157,7 @@ module ARM {
         image_data: vector<u8>,
         description: vector<u8>,
     ) {
-        assert(Signer::address_of(sender) == NFT_ADDRESS, PERMISSION_DENIED);
+        assert(Signer::address_of(sender) == ARM_ADDRESS, PERMISSION_DENIED);
         let metadata = NFT::new_meta_with_image_data(name, image_data, description);
         init_arm(sender, metadata);
         init_gallery(sender);
@@ -143,9 +173,9 @@ module ARM {
         rarity: u8,
         stamina: u8,
         win_rate_bonus: u8,
-    ) acquires ARMNFTCapability, ARMBoxCapability, ARMGallery {
+    ) acquires ARMCapability, ARMGallery {
         let sender_address = Signer::address_of(sender);
-        assert(sender_address == NFT_ADDRESS, PERMISSION_DENIED);
+        assert(sender_address == ARM_ADDRESS, PERMISSION_DENIED);
         let metadata = NFT::new_meta_with_image(name, image, description);
         mint_arm(sender, metadata, rarity, stamina, win_rate_bonus);
     }
@@ -159,21 +189,36 @@ module ARM {
         rarity: u8,
         stamina: u8,
         win_rate_bonus: u8,
-    ) acquires ARMNFTCapability, ARMBoxCapability, ARMGallery {
+    ) acquires ARMCapability, ARMGallery {
         let sender_address = Signer::address_of(sender);
-        assert(sender_address == NFT_ADDRESS, PERMISSION_DENIED);
+        assert(sender_address == ARM_ADDRESS, PERMISSION_DENIED);
         let metadata = NFT::new_meta_with_image_data(name, image_data, description);
         mint_arm(sender, metadata, rarity, stamina, win_rate_bonus);
     }
 
-    // get a random ARM
-    public fun f_get_arm(sender: &signer)
-    acquires ARMBoxCapability, ARMGallery {
-        plat_address = @0x12323;
-        let aww_amount = f_get_aww_amount(20000000000u128);
-        let aww_token = Account::pay_from<AWW>(sender, plat_address, aww_amount);
-        let stc_token = Account::pay_from<STC>(sender, plat_address, 100000000000u128);
+    public fun f_get_win_rate_bonus(arm: & NFT<ARMMeta, ARMBody>): u8 {
+        let arm_meta = NFT::get_type_meta<ARMMeta, ARMBody>(arm);
+        arm_meta.win_rate_bonus
+    }
 
+    // deduction ARM stamina
+    public fun f_deduction_stamina(arm: &mut NFT<ARMMeta, ARMBody>) acquires ARMCapability {
+        let cap = borrow_global_mut<ARMCapability>(ARM_ADDRESS);
+        let arm_meta = NFT::get_type_meta<ARMMeta, ARMBody>(arm);
+        let stamina = arm_meta.stamina;
+        let arm_body = NFT::borrow_body_mut_with_cap<ARMMeta, ARMBody>(&mut cap.update, arm);
+
+        let now = Timestamp::now_seconds();
+        if ((arm_body.time + DAY_FACTOR) < now) {
+            arm_body.time = now / DAY_FACTOR * DAY_FACTOR;
+            arm_body.used_stamina = 0u8;
+        };
+        assert(stamina > arm_body.used_stamina, INSUFFICIENT_STAMINA);
+
+        arm_body.used_stamina = arm_body.used_stamina + 1u8;
+    }
+
+    public fun random(range: u64): u64 {
         // get hash last 64 bit and mod nft_size
         let hash = Block::get_parent_hash();
         let k = 0u64;
@@ -183,17 +228,27 @@ module ARM {
             k = (tmp << (i * 8) as u64) + k;
             i = i + 1;
         };
-        let idx = k % count_of(NFT_ADDRESS);
-        // get a nft by idx
+        k % range
+    }
+
+    // get a random ARM
+    public fun get_arm(sender: &signer)
+    acquires ARMGallery {
+        let aww_amount = f_get_aww_amount(20000000000u128);
+        Account::pay_from<AWW>(sender, ARM_ADDRESS, aww_amount);
+        Account::pay_from<STC>(sender, ARM_ADDRESS, 100000000000u128);
+
+        let idx = random(count_of(ARM_ADDRESS));
+        // get a arm by idx
         let sender_address = Signer::address_of(sender);
-        let gallery = borrow_global_mut<ARMGallery>(NFT_ADDRESS);
+        let gallery = borrow_global_mut<ARMGallery>(ARM_ADDRESS);
         let nft = Vector::remove<NFT<ARMMeta, ARMBody>>(&mut gallery.items, idx);
         let id = NFT::get_id<ARMMeta, ARMBody>(&nft);
         NFTGallery::accept<ARMMeta, ARMBody>(sender);
         NFTGallery::deposit<ARMMeta, ARMBody>(sender, nft);
         // emit event
-        Event::emit_event<BoxOpenEvent<ARMMeta, ARMBody>>(&mut gallery.box_open_events,
-            BoxOpenEvent {
+        Event::emit_event<ArmGetEvent>(&mut gallery.arm_get_events,
+            ArmGetEvent {
                 owner: sender_address,
                 id: id,
             },
@@ -203,18 +258,18 @@ module ARM {
     fun f_get_aww_amount(usdt_amount: u128): u128 {
         // order x and y to avoid duplicates
         let order = SwapLibrary::get_token_order<USDT, AWW>();
-        let (reserve_usdt, reserve_aww);
+        let (reserve_usdt, reserve_aww): (u128, u128);
         if (order == 1) {
             (reserve_usdt, reserve_aww) = SwapPair::get_reserves<USDT, AWW>();
         } else {
             (reserve_aww, reserve_usdt) = SwapPair::get_reserves<AWW, USDT>();
         };
 
-        mul_div(usdt_amount, reserve_aww, reserve_usdt)
+        Math::mul_div(usdt_amount, reserve_aww, reserve_usdt)
     }
 
     fun f_get_reserves<X: store, Y: store>(): (u128, u128) {
-        let pair_exists = SwapPair::pair_exists<X, Y>(PAIR_ADDRESS);
+        let pair_exists = SwapPair::pair_exists<X, Y>(SWAP_ADDRESS);
         assert(pair_exists, SWAP_PAIR_NOT_EXISTS);
         let (reserve_x, reserve_y) = SwapPair::get_reserves<X, Y>();
         (reserve_x, reserve_y)
@@ -248,7 +303,7 @@ module ARM {
         rarity: u8,
         stamina: u8,
         win_rate_bonus: u8,
-    ) acquires ARMNFTCapability, ARMBoxCapability, ARMGallery {
+    ) acquires ARMCapability, ARMGallery {
         f_mint_with_image(&sender, name, image, description, rarity, stamina, win_rate_bonus);
     }
 
@@ -260,7 +315,7 @@ module ARM {
         rarity: u8,
         stamina: u8,
         win_rate_bonus: u8,
-    ) acquires ARMNFTCapability, ARMBoxCapability, ARMGallery {
+    ) acquires ARMCapability, ARMGallery {
         f_mint_with_image_data(&sender, name, image_data, description, rarity, stamina, win_rate_bonus);
     }
 }
