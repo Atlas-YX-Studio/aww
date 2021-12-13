@@ -2,6 +2,7 @@ address 0x16a8bf4d0c3718518d81f132801e4aaa {
 module AWWScripts {
 
     use 0x16a8bf4d0c3718518d81f132801e4aaa::ARMMarket;
+    use 0x16a8bf4d0c3718518d81f132801e4aaa::AWWGame;
 
     // ******************** Config ********************
     // init
@@ -22,7 +23,7 @@ module AWWScripts {
     }
 
     // ******************** Initial Offering ********************
-    public(script) fun init_market<NFTMeta: store + drop, NFTBody: store + drop, BoxToken: store, PayToken: store>(
+    public(script) fun init_market(
         sender: signer,
     ) {
         ARMMarket::init_market(&sender);
@@ -30,23 +31,27 @@ module AWWScripts {
 
     // ******************** AWW GAME Transaction ********************
 
-//    public(script) fun arm_mint(account: signer) {
-//
-//    }
-//
-//    public(script) fun fight(
-//        account: signer,
-//        id: u64,
-//        level: u8
-//    ) {
-//
-//    }
-//
-//    public(script) fun harvest_reward(
-//        account: signer
-//    ) {
-//
-//    }
+    public(script) fun init_game(account: signer) {
+        AWWGame::init_game(&account);
+    }
+
+    public(script) fun arm_mint(account: signer) {
+        AWWGame::arm_mint(&account);
+    }
+
+    public(script) fun fight(
+        account: signer,
+        id: u64,
+        level: u8
+    ) {
+        AWWGame::fight(&account, id, level);
+    }
+
+    public(script) fun harvest_reward(
+        account: signer
+    ) {
+        AWWGame::harvest_reward(&account);
+    }
 
 
     // ******************** ARM Transaction ********************
