@@ -84,7 +84,7 @@ module AWWGame {
         ARM::f_deduction_stamina(&mut arm);
 
         // fight arguments
-        let reward_amount = 100u128;
+        let reward_amount = 100000000000u128;
         let win_rate = ARM::f_get_win_rate_bonus(&arm);
         if (level == 0u8) {
             win_rate = win_rate + 80u8;
@@ -133,12 +133,16 @@ module AWWGame {
         let now = Timestamp::now_seconds();
         let tax_rate = 30 - (now - user_reward_pool.time) / DAY_FACTOR * 2;
 
-        let reward_amount = Token::value<AWW>(&user_reward_pool.reward) * (tax_rate as u128) / 100;
-        let taxes_amount = Token::value<AWW>(&user_reward_pool.reward) - reward_amount;
+        let taxes_amount = Token::value<AWW>(&user_reward_pool.reward) * (tax_rate as u128) / 100;
+        let reward_amount = Token::value<AWW>(&user_reward_pool.reward) - taxes_amount;
 
         let reward = Token::withdraw<AWW>(&mut user_reward_pool.reward, reward_amount);
         let taxes = Token::withdraw<AWW>(&mut user_reward_pool.reward, taxes_amount);
 
+        let is_accept_token = Account::is_accepts_token<AWW>(player);
+        if (!is_accept_token) {
+            Account::do_accept_token<AWW>(account);
+        };
         Account::deposit<AWW>(player, reward);
         Account::deposit<AWW>(ARM_ADDRESS, taxes);
 

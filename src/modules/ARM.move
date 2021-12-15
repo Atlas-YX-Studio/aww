@@ -231,6 +231,23 @@ module ARM {
         k % range
     }
 
+    public fun airdrop_arm(sender: &signer, reciver: address) acquires ARMGallery {
+        assert(Signer::address_of(sender) == ARM_ADDRESS, PERMISSION_DENIED);
+        let idx = random(count_of(ARM_ADDRESS));
+        // get a arm by idx
+        let gallery = borrow_global_mut<ARMGallery>(ARM_ADDRESS);
+        let nft = Vector::remove<NFT<ARMMeta, ARMBody>>(&mut gallery.items, idx);
+        let id = NFT::get_id<ARMMeta, ARMBody>(&nft);
+        NFTGallery::deposit_to<ARMMeta, ARMBody>(reciver, nft);
+        // emit event
+        Event::emit_event<ArmGetEvent>(&mut gallery.arm_get_events,
+            ArmGetEvent {
+                owner: reciver,
+                id: id,
+            },
+        );
+    }
+
     // get a random ARM
     public fun get_arm(sender: &signer)
     acquires ARMGallery {
