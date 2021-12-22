@@ -25,6 +25,8 @@ module ARM {
 
     const SWAP_PAIR_NOT_EXISTS: u64 = 100003;
 
+    const STOP_SELLING: u64 = 100004;
+
     const DAY_FACTOR: u64 = 86400;
 
     // ******************** ARM ********************
@@ -98,6 +100,7 @@ module ARM {
     // ******************** NFT Gallery ********************
     // arm gallery
     struct ARMGallery has key, store {
+        sell_open: bool,
         items: vector<NFT<ARMMeta, ARMBody>>,
         arm_mint_events: Event::EventHandle<ARMMintEvent>,
         arm_get_events: Event::EventHandle<ArmGetEvent>,
@@ -119,6 +122,7 @@ module ARM {
     fun init_gallery(sender: &signer) {
         if (!exists<ARMGallery>(Signer::address_of(sender))) {
             let gallery = ARMGallery {
+                sell_open: true,
                 items: Vector::empty<NFT<ARMMeta, ARMBody>>(),
                 arm_mint_events: Event::new_event_handle<ARMMintEvent>(sender),
                 arm_get_events: Event::new_event_handle<ArmGetEvent>(sender),
@@ -132,6 +136,12 @@ module ARM {
     acquires ARMGallery {
         let gallery = borrow_global_mut<ARMGallery>(owner);
         Vector::length(&gallery.items)
+    }
+
+    fun f_update_selling_state(sender: &signer, sell_open: bool) acquires ARMGallery {
+        let sender_address = Signer::address_of(sender);
+        let gallery = borrow_global_mut<ARMGallery>(sender_address);
+        gallery.sell_open = sell_open;
     }
 
     // ******************** NFT public function ********************
@@ -259,6 +269,7 @@ module ARM {
         // get a arm by idx
         let sender_address = Signer::address_of(sender);
         let gallery = borrow_global_mut<ARMGallery>(ARM_ADDRESS);
+        assert(gallery.sell_open, STOP_SELLING);
         let nft = Vector::remove<NFT<ARMMeta, ARMBody>>(&mut gallery.items, idx);
         let id = NFT::get_id<ARMMeta, ARMBody>(&nft);
         NFTGallery::accept<ARMMeta, ARMBody>(sender);
@@ -334,6 +345,10 @@ module ARM {
         win_rate_bonus: u8,
     ) acquires ARMCapability, ARMGallery {
         f_mint_with_image_data(&sender, name, image_data, description, rarity, stamina, win_rate_bonus);
+    }
+
+    public(script) fun update_selling_state(sender: signer, sell_open: bool) acquires ARMGallery {
+        f_update_selling_state(&sender, sell_open);
     }
 }
 }
