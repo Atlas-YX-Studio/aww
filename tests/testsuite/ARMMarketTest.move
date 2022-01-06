@@ -28,6 +28,20 @@ script {
 //! account: aww, 0x16a8bf4d0c3718518d81f132801e4aaa
 //! sender: aww
 address aww = {{aww}};
+script {
+    use 0x16a8bf4d0c3718518d81f132801e4aaa::AWW;
+    use 0x1::Account;
+
+    fun init_aww(sender: signer) {
+        AWW::initialize(&sender);
+        Account::set_auto_accept_token(&sender, true);
+        AWW::mint_to(&sender, 100000000000000u128, @aww);
+    }
+}
+
+//! new-transaction
+//! sender: aww
+address aww = {{aww}};
 address bob = {{bob}};
 address alice = {{alice}};
 script {

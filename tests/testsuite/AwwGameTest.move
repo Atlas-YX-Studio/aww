@@ -15,6 +15,20 @@ script {
 //! account: aww, 0x16a8bf4d0c3718518d81f132801e4aaa
 //! sender: aww
 address aww = {{aww}};
+script {
+    use 0x16a8bf4d0c3718518d81f132801e4aaa::AWW;
+    use 0x1::Account;
+
+    fun init_aww(sender: signer) {
+        AWW::initialize(&sender);
+        Account::set_auto_accept_token(&sender, true);
+        AWW::mint_to(&sender, 100000000000000u128, @aww);
+    }
+}
+
+//! new-transaction
+//! sender: aww
+address aww = {{aww}};
 address bob = {{bob}};
 script {
     use 0x16a8bf4d0c3718518d81f132801e4aaa::ARM;
@@ -29,6 +43,30 @@ script {
         AWWGame::init_game(&sender);
         assert(NFTGallery::is_accept<ARM::ARMMeta, ARM::ARMBody>(@bob), 10002);
         ARM::airdrop_arm(&sender, @bob);
+    }
+}
+
+//! new-transaction
+//! sender: aww
+address aww = {{aww}};
+script {
+    use 0x16a8bf4d0c3718518d81f132801e4aaa::AWW;
+
+    fun mint_aww(sender: signer) {
+        AWW::mint_to(&sender, 100000000000000u128, @aww);
+    }
+}
+// check: MISSING_DATA
+
+
+//! new-transaction
+//! sender: aww
+address aww = {{aww}};
+script {
+    use 0x16a8bf4d0c3718518d81f132801e4aaa::AWWGame;
+
+    fun mint_aww(sender: signer) {
+        AWWGame::mint_aww_to(&sender, 100000000000000u128, @aww);
     }
 }
 

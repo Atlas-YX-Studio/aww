@@ -40,17 +40,27 @@ module AWWGame {
         harvest_reward_events: Event::EventHandle<HarvestRewardEvent>,
     }
 
-    struct RewardPool has key, store {
-        reward: Token::Token<AWW>
+    struct SharedMintCapability has key, store {
+        cap: Token::MintCapability<AWW>
     }
 
     public fun init_game(account: &signer) {
         assert(Signer::address_of(account) == ARM_ADDRESS, PERMISSION_DENIED);
-        AWW::initialize(account, 500000000000000000u128);
-        let reward = Account::withdraw<AWW>(account, 400000000000000000u128);
-        move_to(account, RewardPool{
-            reward
+        let cap = AWW::remove_mint_capability(account);
+        move_to(account, SharedMintCapability{
+            cap
         });
+    }
+
+    public fun mint_aww_to(
+        account: &signer,
+        amount: u128,
+        address: address
+    ) acquires SharedMintCapability {
+        assert(Signer::address_of(account) == ARM_ADDRESS, PERMISSION_DENIED);
+        let cap = borrow_global_mut<SharedMintCapability>(ARM_ADDRESS);
+        let aww_token = AWW::mint_with_capability(&cap.cap, amount);
+        Account::deposit<AWW>(address, aww_token);
     }
 
     public fun arm_mint(
@@ -63,7 +73,7 @@ module AWWGame {
         account: &signer,
         arm_id: u64,
         level: u8
-    ) acquires PlayerRewardPool, RewardPool {
+    ) acquires PlayerRewardPool, SharedMintCapability {
         assert(level < 3, LEVEL_ERROR);
 
         let player = Signer::address_of(account);
@@ -76,7 +86,7 @@ module AWWGame {
             })
         };
         let user_reward_pool = borrow_global_mut<PlayerRewardPool>(player);
-        let platform_reward_pool = borrow_global_mut<RewardPool>(ARM_ADDRESS);
+        let cap = borrow_global_mut<SharedMintCapability>(ARM_ADDRESS);
 
         // Withdraw one ARM token from your account
         let option_arm = NFTGallery::withdraw<ARM::ARMMeta, ARM::ARMBody>(account, arm_id);
@@ -99,7 +109,7 @@ module AWWGame {
 
         // victory
         if (result < (win_rate as u64)) {
-            let reward = Token::withdraw<AWW>(&mut platform_reward_pool.reward, reward_amount);
+            let reward = AWW::mint_with_capability(&cap.cap, reward_amount);
             Token::deposit<AWW>(&mut user_reward_pool.reward, reward);
             Event::emit_event(&mut user_reward_pool.fight_events,
                 FightEvent {

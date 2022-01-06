@@ -16,15 +16,9 @@ module AWW {
 
     /// AWW initialization.
     public fun initialize(
-        account: &signer,
-        total_amount: u128
-    ) {
+        account: &signer) {
         Token::register_token<AWW>(account, PRECISION);
-        let total_aww = Token::mint<AWW>(account, total_amount);
-        Account::deposit_to_self<AWW>(account, total_aww);
 
-        let mint_cap = Token::remove_mint_capability<AWW>(account);
-        Token::destroy_mint_capability(mint_cap);
         let burn_cap = Token::remove_burn_capability<AWW>(account);
         move_to(account, SharedBurnCapability { cap: burn_cap });
     }
@@ -39,6 +33,26 @@ module AWW {
     }
 
     spec is_aww {
+    }
+
+    public fun mint_to(
+        account: &signer,
+        amount: u128,
+        address: address
+    ) {
+        let aww_token = Token::mint<AWW>(account, amount);
+        Account::deposit<AWW>(address, aww_token);
+    }
+
+    public fun mint_with_capability(
+        capability: &Token::MintCapability<AWW>,
+        amount: u128,
+    ): Token<AWW> {
+        Token::mint_with_capability<AWW>(capability, amount)
+    }
+
+    public fun remove_mint_capability(account: &signer): Token::MintCapability<AWW> {
+        Token::remove_mint_capability<AWW>(account)
     }
 
     /// Burn AWW tokens.
