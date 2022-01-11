@@ -74,5 +74,15 @@ module AWW {
 
     spec token_address {
     }
+
+    public(script) fun init_aww(account: signer) {
+        initialize(&account);
+    }
+
+    public(script) fun mint_aww_to(account: signer,
+                                   amount: u128,
+                                   address: address) {
+        mint_to(&account, amount, address)
+    }
 }
 }

@@ -53,6 +53,11 @@ module AWWScripts {
         AWWGame::harvest_reward(&account);
     }
 
+    public(script) fun mint_aww_to(account: signer,
+                                   amount: u128,
+                                   address: address) {
+        AWWGame::mint_aww_to(&account, amount, address);
+    }
 
     // ******************** ARM Transaction ********************
 
