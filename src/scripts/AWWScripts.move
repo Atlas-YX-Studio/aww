@@ -31,8 +31,12 @@ module AWWScripts {
 
     // ******************** AWW GAME Transaction ********************
 
-    public(script) fun init_game(account: signer) {
-        AWWGame::init_game(&account);
+    public(script) fun init_game(account: signer, selling_time: u64) {
+        AWWGame::init_game(&account, selling_time);
+    }
+
+    public(script) fun update_game_config(account: signer, selling_time: u64) {
+        AWWGame::update_game_config(&account, selling_time);
     }
 
     public(script) fun arm_mint(account: signer) {

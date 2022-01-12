@@ -59,7 +59,7 @@ script {
         ARM::f_mint_with_image(&sender, b"aww arm", b"www.baidu.com", b"this is a arm", 1u8, 10u8, 30u8);
         ARM::f_mint_with_image(&sender, b"aww arm", b"www.baidu.com", b"this is a arm", 1u8, 10u8, 30u8);
         assert(ARM::count_of(Signer::address_of(&sender))==3, 10001);
-        AWWGame::init_game(&sender);
+        AWWGame::init_game(&sender, 0);
 
         assert(NFTGallery::is_accept<ARM::ARMMeta, ARM::ARMBody>(@bob), 10002);
         ARM::airdrop_arm(&sender, @bob);

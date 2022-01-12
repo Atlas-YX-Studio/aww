@@ -19,6 +19,10 @@ module AWWGame {
 
     const NO_REWARDS_ERROR: u64 = 100003;
 
+    const ARM_NOT_ON_SALE: u64 = 100004;
+
+    const ARM_SOLD_OUT: u64 = 100005;
+
     const DAY_FACTOR: u64 = 86400;
 
     struct FightEvent has drop, store {
@@ -46,11 +50,18 @@ module AWWGame {
         cap: Token::MintCapability<AWW>
     }
 
-    public fun init_game(account: &signer) {
+    struct GameConfig has key, store {
+        arm_selling_time: u64
+    }
+
+    public fun init_game(account: &signer, arm_selling_time: u64) {
         assert(Signer::address_of(account) == ARM_ADDRESS, PERMISSION_DENIED);
         let cap = AWW::remove_mint_capability(account);
         move_to(account, SharedMintCapability{
             cap
+        });
+        move_to(account, GameConfig{
+            arm_selling_time
         });
     }
 
@@ -65,9 +76,18 @@ module AWWGame {
         Account::deposit<AWW>(address, aww_token);
     }
 
+    public fun update_game_config(account: &signer, arm_selling_time: u64) acquires GameConfig {
+        assert(Signer::address_of(account) == ARM_ADDRESS, PERMISSION_DENIED);
+        let game_config = borrow_global_mut<GameConfig>(ARM_ADDRESS);
+        game_config.arm_selling_time = arm_selling_time;
+    }
+
     public fun arm_mint(
         account: &signer
-    ) {
+    ) acquires GameConfig {
+        let game_config = borrow_global<GameConfig>(ARM_ADDRESS);
+        assert(Timestamp::now_milliseconds() >= game_config.arm_selling_time, ARM_NOT_ON_SALE);
+        assert(ARM::count_of(ARM_ADDRESS) > 0, ARM_SOLD_OUT);
         ARM::get_arm(account);
     }
 
