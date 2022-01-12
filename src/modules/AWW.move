@@ -1,4 +1,4 @@
-address 0x16a8bf4d0c3718518d81f132801e4aaa {
+address 0x49142e24bf3b34b323b3bd339e2434e3 {
 module AWW {
     use 0x1::Token::{Self, Token};
     use 0x1::Account;

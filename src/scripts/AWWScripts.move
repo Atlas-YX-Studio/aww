@@ -1,8 +1,8 @@
-address 0x16a8bf4d0c3718518d81f132801e4aaa {
+address 0x49142e24bf3b34b323b3bd339e2434e3 {
 module AWWScripts {
 
-    use 0x16a8bf4d0c3718518d81f132801e4aaa::ARMMarket;
-    use 0x16a8bf4d0c3718518d81f132801e4aaa::AWWGame;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::ARMMarket;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWWGame;
 
     // ******************** Config ********************
     // init

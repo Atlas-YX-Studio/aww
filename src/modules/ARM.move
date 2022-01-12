@@ -1,21 +1,20 @@
-address 0x16a8bf4d0c3718518d81f132801e4aaa {
+address 0x49142e24bf3b34b323b3bd339e2434e3 {
 module ARM {
     use 0x1::Signer;
     use 0x1::Event;
-    use 0x1::Block;
     use 0x1::Vector;
     use 0x1::Account;
     use 0x1::Math;
     use 0x1::Timestamp;
     use 0x1::NFT::{Self, NFT};
     use 0x1::NFTGallery;
-    use 0x16a8bf4d0c3718518d81f132801e4aaa::AWW::AWW;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW::AWW;
     use 0x5b876a58b0e1cff855b6489cd8cf3bec::DummyToken::STC;
     use 0x5b876a58b0e1cff855b6489cd8cf3bec::DummyToken::USDT;
     use 0xc9097c917625f3b01d59b375e0630b07::SwapLibrary;
     use 0xc9097c917625f3b01d59b375e0630b07::SwapPair;
 
-    const ARM_ADDRESS: address = @0x16a8bf4d0c3718518d81f132801e4aaa;
+    const ARM_ADDRESS: address = @0x49142e24bf3b34b323b3bd339e2434e3;
 
     const SWAP_ADDRESS: address = @0xc9097c917625f3b01d59b375e0630b07;
 
@@ -229,15 +228,7 @@ module ARM {
     }
 
     public fun random(range: u64): u64 {
-        // get hash last 64 bit and mod nft_size
-        let hash = Block::get_parent_hash();
-        let k = 0u64;
-        let i = 0;
-        while (i < 8) {
-            let tmp = (Vector::pop_back<u8>(&mut hash) as u128);
-            k = (tmp << (i * 8) as u64) + k;
-            i = i + 1;
-        };
+        let k = Timestamp::now_milliseconds();
         k % range
     }
 

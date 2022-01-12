@@ -1,4 +1,4 @@
-address 0x16a8bf4d0c3718518d81f132801e4aaa {
+address 0x49142e24bf3b34b323b3bd339e2434e3 {
 module AWWGame {
     use 0x1::Signer;
     use 0x1::Event;
@@ -8,14 +8,16 @@ module AWWGame {
     use 0x1::Option;
     use 0x1::Math;
     use 0x1::NFTGallery;
-    use 0x16a8bf4d0c3718518d81f132801e4aaa::ARM;
-    use 0x16a8bf4d0c3718518d81f132801e4aaa::AWW::{Self, AWW};
+    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW::{Self, AWW};
 
-    const ARM_ADDRESS: address = @0x16a8bf4d0c3718518d81f132801e4aaa;
+    const ARM_ADDRESS: address = @0x49142e24bf3b34b323b3bd339e2434e3;
 
     const PERMISSION_DENIED: u64 = 100001;
 
     const LEVEL_ERROR: u64 = 100002;
+
+    const NO_REWARDS_ERROR: u64 = 100003;
 
     const DAY_FACTOR: u64 = 86400;
 
@@ -139,15 +141,27 @@ module AWWGame {
         account: &signer
     ) acquires PlayerRewardPool {
         let player = Signer::address_of(account);
-        let user_reward_pool = borrow_global_mut<PlayerRewardPool>(player);
+        assert(exists<PlayerRewardPool>(player), NO_REWARDS_ERROR);
+        let user_reward_pool = move_from<PlayerRewardPool>(player);
+        let PlayerRewardPool {
+        time,
+        reward,
+        fight_events,
+        harvest_reward_events,
+        } = user_reward_pool;
+
         let now = Timestamp::now_seconds();
-        let tax_rate = 30 - (now - user_reward_pool.time) / DAY_FACTOR * 2;
+        let discount = (now - time) / DAY_FACTOR * 2;
+        let tax_rate = if (discount > 30) {
+            0
+        } else {
+            30 - discount
+        };
 
-        let taxes_amount = Token::value<AWW>(&user_reward_pool.reward) * (tax_rate as u128) / 100;
-        let reward_amount = Token::value<AWW>(&user_reward_pool.reward) - taxes_amount;
+        let taxes_amount = Token::value<AWW>(&reward) * (tax_rate as u128) / 100;
+        let taxes = Token::withdraw<AWW>(&mut reward, taxes_amount);
 
-        let reward = Token::withdraw<AWW>(&mut user_reward_pool.reward, reward_amount);
-        let taxes = Token::withdraw<AWW>(&mut user_reward_pool.reward, taxes_amount);
+        let reward_amount = Token::value<AWW>(&reward);
 
         let is_accept_token = Account::is_accepts_token<AWW>(player);
         if (!is_accept_token) {
@@ -156,13 +170,15 @@ module AWWGame {
         Account::deposit<AWW>(player, reward);
         Account::deposit<AWW>(ARM_ADDRESS, taxes);
 
-        Event::emit_event(&mut user_reward_pool.harvest_reward_events,
+        Event::emit_event(&mut harvest_reward_events,
             HarvestRewardEvent {
                 player,
                 taxes_amount,
                 reward_amount,
             }
         );
+        Event::destroy_handle(harvest_reward_events);
+        Event::destroy_handle(fight_events);
     }
 }
 }
