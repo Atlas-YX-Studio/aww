@@ -1,4 +1,4 @@
-address 0x49142e24bf3b34b323b3bd339e2434e3 {
+address 0xdedc7865659fe0dab662da125bf40b32 {
 module ARM {
     use 0x1::Signer;
     use 0x1::Event;
@@ -8,13 +8,13 @@ module ARM {
     use 0x1::Timestamp;
     use 0x1::NFT::{Self, NFT};
     use 0x1::NFTGallery;
-    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW::AWW;
+    use 0xdedc7865659fe0dab662da125bf40b32::AWW::AWW;
     use 0x5b876a58b0e1cff855b6489cd8cf3bec::DummyToken::STC;
     use 0x5b876a58b0e1cff855b6489cd8cf3bec::DummyToken::USDT;
     use 0xc9097c917625f3b01d59b375e0630b07::SwapLibrary;
     use 0xc9097c917625f3b01d59b375e0630b07::SwapPair;
 
-    const ARM_ADDRESS: address = @0x49142e24bf3b34b323b3bd339e2434e3;
+    const ARM_ADDRESS: address = @0xdedc7865659fe0dab662da125bf40b32;
 
     const SWAP_ADDRESS: address = @0xc9097c917625f3b01d59b375e0630b07;
 

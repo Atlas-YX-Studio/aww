@@ -1,4 +1,4 @@
-address 0x49142e24bf3b34b323b3bd339e2434e3 {
+address 0xdedc7865659fe0dab662da125bf40b32 {
 module AWWGame {
     use 0x1::Signer;
     use 0x1::Event;
@@ -8,10 +8,10 @@ module AWWGame {
     use 0x1::Option;
     use 0x1::Math;
     use 0x1::NFTGallery;
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM;
-    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW::{Self, AWW};
+    use 0xdedc7865659fe0dab662da125bf40b32::ARM;
+    use 0xdedc7865659fe0dab662da125bf40b32::AWW::{Self, AWW};
 
-    const ARM_ADDRESS: address = @0x49142e24bf3b34b323b3bd339e2434e3;
+    const ARM_ADDRESS: address = @0xdedc7865659fe0dab662da125bf40b32;
 
     const PERMISSION_DENIED: u64 = 100001;
 
@@ -86,9 +86,13 @@ module AWWGame {
         account: &signer
     ) acquires GameConfig {
         let game_config = borrow_global<GameConfig>(ARM_ADDRESS);
-        assert(Timestamp::now_milliseconds() >= game_config.arm_selling_time, ARM_NOT_ON_SALE);
+        assert(Timestamp::now_milliseconds() < game_config.arm_selling_time, ARM_NOT_ON_SALE);
         assert(ARM::count_of(ARM_ADDRESS) > 0, ARM_SOLD_OUT);
         ARM::get_arm(account);
+    }
+
+    public fun airdrop_arm(sender: &signer, reciver: address) {
+        ARM::airdrop_arm(sender, reciver);
     }
 
     public fun fight(

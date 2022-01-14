@@ -1,8 +1,8 @@
-address 0x49142e24bf3b34b323b3bd339e2434e3 {
+address 0xdedc7865659fe0dab662da125bf40b32 {
 module AWWScripts {
 
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARMMarket;
-    use 0x49142e24bf3b34b323b3bd339e2434e3::AWWGame;
+    use 0xdedc7865659fe0dab662da125bf40b32::ARMMarket;
+    use 0xdedc7865659fe0dab662da125bf40b32::AWWGame;
 
     // ******************** Config ********************
     // init
@@ -41,6 +41,10 @@ module AWWScripts {
 
     public(script) fun arm_mint(account: signer) {
         AWWGame::arm_mint(&account);
+    }
+
+    public(script) fun airdrop_arm(sender: signer, reciver: address) {
+        AWWGame::airdrop_arm(&sender, reciver);
     }
 
     public(script) fun fight(

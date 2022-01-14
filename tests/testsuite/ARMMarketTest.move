@@ -3,7 +3,7 @@
 //! sender: bob
 address bob = {{bob}};
 script {
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM::{ARMMeta, ARMBody};
+    use 0xdedc7865659fe0dab662da125bf40b32::ARM::{ARMMeta, ARMBody};
     use 0x1::NFTGallery;
     //    use 0x1::Signer;
 
@@ -25,11 +25,11 @@ script {
 }
 
 //! new-transaction
-//! account: aww, 0x49142e24bf3b34b323b3bd339e2434e3
+//! account: aww, 0xdedc7865659fe0dab662da125bf40b32
 //! sender: aww
 address aww = {{aww}};
 script {
-    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW;
+    use 0xdedc7865659fe0dab662da125bf40b32::AWW;
     use 0x1::Account;
 
     fun init_aww(sender: signer) {
@@ -45,10 +45,10 @@ address aww = {{aww}};
 address bob = {{bob}};
 address alice = {{alice}};
 script {
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM;
-    use 0x49142e24bf3b34b323b3bd339e2434e3::AWWGame;
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARMMarket;
-    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW::AWW;
+    use 0xdedc7865659fe0dab662da125bf40b32::ARM;
+    use 0xdedc7865659fe0dab662da125bf40b32::AWWGame;
+    use 0xdedc7865659fe0dab662da125bf40b32::ARMMarket;
+    use 0xdedc7865659fe0dab662da125bf40b32::AWW::AWW;
     use 0x1::Signer;
     use 0x1::NFTGallery;
     use 0x1::Account;
@@ -78,8 +78,8 @@ script {
 //! sender: bob
 address bob = {{bob}};
 script {
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM::{ARMMeta, ARMBody};
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARMMarket;
+    use 0xdedc7865659fe0dab662da125bf40b32::ARM::{ARMMeta, ARMBody};
+    use 0xdedc7865659fe0dab662da125bf40b32::ARMMarket;
     use 0x1::Signer;
     use 0x1::NFTGallery;
 
@@ -105,8 +105,8 @@ script {
 //! sender: alice
 address alice = {{alice}};
 script {
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM::{ARMMeta, ARMBody};
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARMMarket;
+    use 0xdedc7865659fe0dab662da125bf40b32::ARM::{ARMMeta, ARMBody};
+    use 0xdedc7865659fe0dab662da125bf40b32::ARMMarket;
     use 0x1::Signer;
     use 0x1::NFTGallery;
 
@@ -124,8 +124,8 @@ script {
 //! sender: bob
 address bob = {{bob}};
 script {
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM::{ARMMeta, ARMBody};
-    use 0x49142e24bf3b34b323b3bd339e2434e3::ARMMarket;
+    use 0xdedc7865659fe0dab662da125bf40b32::ARM::{ARMMeta, ARMBody};
+    use 0xdedc7865659fe0dab662da125bf40b32::ARMMarket;
     use 0x1::Signer;
     use 0x1::NFTGallery;
 
