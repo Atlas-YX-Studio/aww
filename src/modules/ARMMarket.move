@@ -1,4 +1,4 @@
-address 0xdedc7865659fe0dab662da125bf40b32 {
+address 0x49142e24bf3b34b323b3bd339e2434e3 {
 module ARMMarket {
 
     use 0x1::Event;
@@ -11,10 +11,10 @@ module ARMMarket {
     use 0x1::NFT::{Self, NFT};
     use 0x1::NFTGallery;
 
-    use 0xdedc7865659fe0dab662da125bf40b32::AWW::AWW;
-    use 0xdedc7865659fe0dab662da125bf40b32::ARM::{ARMMeta, ARMBody};
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW::AWW;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM::{ARMMeta, ARMBody};
 
-    const NFT_MARKET_ADDRESS: address = @0xdedc7865659fe0dab662da125bf40b32;
+    const NFT_MARKET_ADDRESS: address = @0x49142e24bf3b34b323b3bd339e2434e3;
 
     //error
     const PERMISSION_DENIED: u64 = 200001;

@@ -1,15 +1,15 @@
-address 0xdedc7865659fe0dab662da125bf40b32 {
+address 0x49142e24bf3b34b323b3bd339e2434e3 {
 module Grant {
     use 0x1::Token;
     use 0x1::Signer;
     use 0x1::Account;
 //    use 0x1::STC::STC;
     use 0x1::Timestamp;
-    use 0xdedc7865659fe0dab662da125bf40b32::AWW::AWW;
-    use 0xc9097c917625f3b01d59b375e0630b07::SwapRouter;
-    use 0x5b876a58b0e1cff855b6489cd8cf3bec::DummyToken::STC;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW::AWW;
+    use 0xa371dcd3556f40221b480bd1792c02ad::SwapRouter;
+    use 0x1::STC::STC;
 
-    const ARM_ADDRESS: address = @0xdedc7865659fe0dab662da125bf40b32;
+    const ARM_ADDRESS: address = @0x49142e24bf3b34b323b3bd339e2434e3;
     const PERMISSION_DENIED: u64 = 100001;
     const INSUFFICIENT_BALANCE: u64 = 100002;
     const INSUFFICIENT_FUND: u64 = 100003;

@@ -1,4 +1,4 @@
-address 0xdedc7865659fe0dab662da125bf40b32 {
+address 0x49142e24bf3b34b323b3bd339e2434e3 {
 module AWWGame {
     use 0x1::Signer;
     use 0x1::Event;
@@ -8,10 +8,10 @@ module AWWGame {
     use 0x1::Option;
     use 0x1::Math;
     use 0x1::NFTGallery;
-    use 0xdedc7865659fe0dab662da125bf40b32::ARM;
-    use 0xdedc7865659fe0dab662da125bf40b32::AWW::{Self, AWW};
+    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW::{Self, AWW};
 
-    const ARM_ADDRESS: address = @0xdedc7865659fe0dab662da125bf40b32;
+    const ARM_ADDRESS: address = @0x49142e24bf3b34b323b3bd339e2434e3;
 
     const PERMISSION_DENIED: u64 = 100001;
 
@@ -51,17 +51,17 @@ module AWWGame {
     }
 
     struct GameConfig has key, store {
-        arm_selling_time: u64
+        arm_selling_end_time: u64
     }
 
-    public fun init_game(account: &signer, arm_selling_time: u64) {
+    public fun init_game(account: &signer, arm_selling_end_time: u64) {
         assert(Signer::address_of(account) == ARM_ADDRESS, PERMISSION_DENIED);
         let cap = AWW::remove_mint_capability(account);
         move_to(account, SharedMintCapability{
             cap
         });
         move_to(account, GameConfig{
-            arm_selling_time
+            arm_selling_end_time
         });
     }
 
@@ -76,17 +76,17 @@ module AWWGame {
         Account::deposit<AWW>(address, aww_token);
     }
 
-    public fun update_game_config(account: &signer, arm_selling_time: u64) acquires GameConfig {
+    public fun update_game_config(account: &signer, arm_selling_end_time: u64) acquires GameConfig {
         assert(Signer::address_of(account) == ARM_ADDRESS, PERMISSION_DENIED);
         let game_config = borrow_global_mut<GameConfig>(ARM_ADDRESS);
-        game_config.arm_selling_time = arm_selling_time;
+        game_config.arm_selling_end_time = arm_selling_end_time;
     }
 
     public fun arm_mint(
         account: &signer
     ) acquires GameConfig {
         let game_config = borrow_global<GameConfig>(ARM_ADDRESS);
-        assert(Timestamp::now_milliseconds() < game_config.arm_selling_time, ARM_NOT_ON_SALE);
+        assert(Timestamp::now_milliseconds() < game_config.arm_selling_end_time, ARM_NOT_ON_SALE);
         assert(ARM::count_of(ARM_ADDRESS) > 0, ARM_SOLD_OUT);
         ARM::get_arm(account);
     }
@@ -120,7 +120,7 @@ module AWWGame {
         ARM::f_deduction_stamina(&mut arm);
 
         // fight arguments
-        let reward_amount = 100000000000u128;
+        let reward_amount = ARM::get_aww_amount(7000000000u128);
         let win_rate = ARM::f_get_win_rate_bonus(&arm);
         if (level == 0u8) {
             win_rate = win_rate + 80u8;

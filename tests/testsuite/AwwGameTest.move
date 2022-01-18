@@ -3,7 +3,7 @@
 //! sender: bob
 address bob = {{bob}};
 script {
-    use 0xdedc7865659fe0dab662da125bf40b32::ARM::{ARMMeta, ARMBody};
+    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM::{ARMMeta, ARMBody};
     use 0x1::NFTGallery;
 
     fun acceptArm(sender: signer) {
@@ -12,11 +12,11 @@ script {
 }
 
 //! new-transaction
-//! account: aww, 0xdedc7865659fe0dab662da125bf40b32
+//! account: aww, 0x49142e24bf3b34b323b3bd339e2434e3
 //! sender: aww
 address aww = {{aww}};
 script {
-    use 0xdedc7865659fe0dab662da125bf40b32::AWW;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW;
     use 0x1::Account;
 
     fun init_aww(sender: signer) {
@@ -31,8 +31,8 @@ script {
 address aww = {{aww}};
 address bob = {{bob}};
 script {
-    use 0xdedc7865659fe0dab662da125bf40b32::ARM;
-    use 0xdedc7865659fe0dab662da125bf40b32::AWWGame;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::ARM;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWWGame;
     use 0x1::Signer;
     use 0x1::NFTGallery;
 
@@ -50,7 +50,7 @@ script {
 //! sender: aww
 address aww = {{aww}};
 script {
-    use 0xdedc7865659fe0dab662da125bf40b32::AWW;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW;
 
     fun mint_aww(sender: signer) {
         AWW::mint_to(&sender, 100000000000000u128, @aww);
@@ -63,7 +63,7 @@ script {
 //! sender: aww
 address aww = {{aww}};
 script {
-    use 0xdedc7865659fe0dab662da125bf40b32::AWWGame;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWWGame;
 
     fun mint_aww(sender: signer) {
         AWWGame::mint_aww_to(&sender, 100000000000000u128, @aww);
@@ -74,7 +74,7 @@ script {
 //! sender: bob
 address bob = {{bob}};
 script {
-    use 0xdedc7865659fe0dab662da125bf40b32::AWWGame;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWWGame;
 
     fun fight(sender: signer) {
         AWWGame::fight(&sender, 1u64, 2u8);
@@ -89,8 +89,8 @@ script {
 address bob = {{bob}};
 address aww = {{aww}};
 script {
-    use 0xdedc7865659fe0dab662da125bf40b32::AWWGame;
-    use 0xdedc7865659fe0dab662da125bf40b32::AWW::AWW;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWWGame;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW::AWW;
     use 0x1::Account;
     use 0x1::Signer;
     use 0x1::Debug;
@@ -109,7 +109,7 @@ script {
 //! sender: bob
 address bob = {{bob}};
 script {
-    use 0xdedc7865659fe0dab662da125bf40b32::AWWGame;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWWGame;
 
     fun fight(sender: signer) {
         AWWGame::fight(&sender, 1u64, 0u8);

@@ -1,4 +1,4 @@
-address 0xdedc7865659fe0dab662da125bf40b32 {
+address 0x49142e24bf3b34b323b3bd339e2434e3 {
 module ARM {
     use 0x1::Signer;
     use 0x1::Event;
@@ -8,15 +8,14 @@ module ARM {
     use 0x1::Timestamp;
     use 0x1::NFT::{Self, NFT};
     use 0x1::NFTGallery;
-    use 0xdedc7865659fe0dab662da125bf40b32::AWW::AWW;
-    use 0x5b876a58b0e1cff855b6489cd8cf3bec::DummyToken::STC;
-    use 0x5b876a58b0e1cff855b6489cd8cf3bec::DummyToken::USDT;
-    use 0xc9097c917625f3b01d59b375e0630b07::SwapLibrary;
-    use 0xc9097c917625f3b01d59b375e0630b07::SwapPair;
+    use 0x49142e24bf3b34b323b3bd339e2434e3::AWW::AWW;
+    use 0x1::STC::STC;
+    use 0xa371dcd3556f40221b480bd1792c02ad::SwapLibrary;
+    use 0xa371dcd3556f40221b480bd1792c02ad::SwapPair;
 
-    const ARM_ADDRESS: address = @0xdedc7865659fe0dab662da125bf40b32;
+    const ARM_ADDRESS: address = @0x49142e24bf3b34b323b3bd339e2434e3;
 
-    const SWAP_ADDRESS: address = @0xc9097c917625f3b01d59b375e0630b07;
+    const SWAP_ADDRESS: address = @0xa371dcd3556f40221b480bd1792c02ad;
 
     const PERMISSION_DENIED: u64 = 100001;
 
@@ -252,7 +251,7 @@ module ARM {
     // get a random ARM
     public fun get_arm(sender: &signer)
     acquires ARMGallery {
-        let aww_amount = f_get_aww_amount(20000000000u128);
+        let aww_amount = get_aww_amount(200000000000u128);
         Account::pay_from<AWW>(sender, ARM_ADDRESS, aww_amount);
         Account::pay_from<STC>(sender, ARM_ADDRESS, 100000000000u128);
 
@@ -274,17 +273,16 @@ module ARM {
         );
     }
 
-    fun f_get_aww_amount(usdt_amount: u128): u128 {
+    public fun get_aww_amount(stc_amount: u128): u128 {
         // order x and y to avoid duplicates
-        let order = SwapLibrary::get_token_order<USDT, AWW>();
-        let (reserve_usdt, reserve_aww): (u128, u128);
+        let order = SwapLibrary::get_token_order<STC, AWW>();
+        let (reserve_stc, reserve_aww): (u128, u128);
         if (order == 1) {
-            (reserve_usdt, reserve_aww) = SwapPair::get_reserves<USDT, AWW>();
+            (reserve_stc, reserve_aww) = SwapPair::get_reserves<STC, AWW>();
         } else {
-            (reserve_aww, reserve_usdt) = SwapPair::get_reserves<AWW, USDT>();
+            (reserve_aww, reserve_stc) = SwapPair::get_reserves<AWW, STC>();
         };
-
-        Math::mul_div(usdt_amount, reserve_aww, reserve_usdt)
+        Math::mul_div(stc_amount, reserve_aww, reserve_stc)
     }
 
     fun f_get_reserves<X: store, Y: store>(): (u128, u128) {
