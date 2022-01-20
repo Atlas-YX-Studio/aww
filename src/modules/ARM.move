@@ -142,6 +142,19 @@ module ARM {
         gallery.sell_open = sell_open;
     }
 
+    fun f_burn_gallery_arm(sender: &signer, amount: u64) acquires ARMGallery {
+        let gallery = borrow_global_mut<ARMGallery>(ARM_ADDRESS);
+        let i = 0;
+        while (i < amount) {
+            if (Vector::is_empty<NFT<ARMMeta, ARMBody>>(& gallery.items)) {
+                break
+            };
+            let arm = Vector::pop_back<NFT<ARMMeta, ARMBody>>(&mut gallery.items);
+            NFT::burn<ARMMeta, ARMBody>(sender, arm);
+            i = i + 1;
+        }
+    }
+
     // ******************** NFT public function ********************
 
     // init nft and box with image
@@ -338,6 +351,10 @@ module ARM {
 
     public(script) fun update_selling_state(sender: signer, sell_open: bool) acquires ARMGallery {
         f_update_selling_state(&sender, sell_open);
+    }
+
+    public(script) fun burn_gallery_arm(sender: signer, amount: u64) acquires ARMGallery {
+        f_burn_gallery_arm(&sender, amount);
     }
 }
 }
