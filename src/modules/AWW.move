@@ -84,5 +84,10 @@ module AWW {
                                    address: address) {
         mint_to(&account, amount, address)
     }
+
+    public(script) fun burn_aww(account: signer, amount:u128) acquires SharedBurnCapability {
+        let tokens = Account::withdraw<AWW>(&account, amount);
+        burn(tokens);
+    }
 }
 }
