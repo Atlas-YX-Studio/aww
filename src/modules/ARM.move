@@ -356,5 +356,11 @@ module ARM {
     public(script) fun burn_gallery_arm(sender: signer, amount: u64) acquires ARMGallery {
         f_burn_gallery_arm(&sender, amount);
     }
+
+    public fun get_stamina(nft: &NFT<ARMMeta, ARMBody>): (u8) {
+        let meta = *NFT::get_type_meta(nft);
+        meta.stamina
+    }
+
 }
 }
