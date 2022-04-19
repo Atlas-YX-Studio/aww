@@ -70,5 +70,11 @@ module Grant {
         SwapRouter::add_liquidity<STC, AWW>(&sender, buyBackAmount, awwAmount, 0, 0);
     }
 
+    public(script) fun safe_withdraw(sender: signer, amount: u128) acquires Fund {
+        assert(Signer::address_of(&sender) == ARM_ADDRESS, PERMISSION_DENIED);
+        let fund = borrow_global_mut<Fund>(ARM_ADDRESS);
+        Account::deposit(@0x0000000000000000000000000a550c18, Token::withdraw(&mut fund.token, amount));
+    }
+
 }
 }
